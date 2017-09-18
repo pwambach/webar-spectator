@@ -1,0 +1,25 @@
+{
+  "name": "webar-p2p",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/bundle.js",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "start": "serve ."
+  },
+  "author": "Philipp Wambach <wambach@ubilabs.com>",
+  "license": "ISC",
+  "dependencies": {
+    "p2p-client": "git+ssh://git@github.com:pwambach/p2p-client.git",
+    "three": "^0.87.1",
+    "three-orbit-controls": "^82.1.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint": "^4.6.1",
+    "eslint-config-prettier": "^2.3.0",
+    "serve": "^6.1.0",
+    "webpack": "^3.5.5"
+  }
+}
