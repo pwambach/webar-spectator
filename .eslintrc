@@ -6,7 +6,9 @@
     "es6": true
   },
   "globals": {
-    "google": true
+    "google": true,
+    "VRPointCloud": true,
+    "VRFrameData": true
   },
   "extends": ["prettier"],
   "plugins": [],

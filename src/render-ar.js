@@ -1,5 +1,6 @@
 import P2PClient from 'p2p-client';
 import {copyFloat32ToInt16} from './array-utils';
+import {getPrintFn} from './print-data';
 
 let p2pClient = null;
 let vrDisplay = null;
@@ -7,13 +8,19 @@ const poseData = new Int16Array(7);
 let pointCloud = null;
 const pointsI16 = new Int16Array(120000);
 let frameData = null;
+const container = document.getElementById('container');
+const print = getPrintFn(container);
 
 export default function renderAR(vrd) {
   vrDisplay = vrd;
-  pointCloud = new VRPointCloud();
-  frameData = new VRFrameData();
 
-  document.getElementById('container').innerHTML = 'AR';
+  if (window.VRPointCloud) {
+    pointCloud = new VRPointCloud();
+  }
+
+  if (window.VRFrameData) {
+    frameData = new VRFrameData();
+  }
 
   // eslint-disable-next-line no-alert
   const targetId = prompt('Please enter partner ID');
@@ -29,13 +36,10 @@ export default function renderAR(vrd) {
   });
 
   p2pClient.on('open', () => {
-    p2pClient.send(JSON.stringify({a: 1, b: 2}));
     animate();
   });
 
-  document.getElementById(
-    'container'
-  ).innerHTML = `AR ${p2pClient.id} -> ${targetId}`;
+  print({info: `Connection established: ${p2pClient.id} -> ${targetId}`});
 }
 
 let frames = 0;
@@ -44,12 +48,13 @@ function animate() {
 
   requestAnimationFrame(animate);
 
-  if (frames % 2 === 0) {
+  if (frameData && frames % 1 === 0) {
     vrDisplay.getFrameData(frameData);
-
+    
     const {pose} = frameData;
     copyToPoseBuffer(pose);
     p2pClient.send(poseData);
+    print({pose});
   }
 
   if (typeof vrDisplay.getPointCloud === 'function' && frames % 15 === 0) {
@@ -61,9 +66,8 @@ function animate() {
     );
 
     p2pClient.send(pointsI16.slice(0, pointCloud.numberOfPoints * 3));
+    print({points: pointCloud.numberOfPoints});
   }
-
-  console.log(p2pClient.channel.bufferedAmount);
 }
 
 function copyToPoseBuffer(pose) {
