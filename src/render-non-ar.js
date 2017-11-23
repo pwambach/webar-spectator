@@ -4,10 +4,11 @@ import createOrbitControls from 'three-orbit-controls';
 import {copyInt16ToFloat32} from './array-utils';
 import {getPrintFn} from './print-data';
 
-let nextOffset = 0;
 const poseFloat32 = new Float32Array(7);
 const container = document.getElementById('container');
 const print = getPrintFn(container);
+const $title = document.getElementById('title');
+let rotateScene = true;
 
 export default function renderNonAR() {
   // Camera
@@ -84,6 +85,10 @@ export default function renderNonAR() {
   window.addEventListener('resize', onWindowResize);
 
   const animate = () => {
+    if (rotateScene) {
+      scene.rotation.y -= 0.001;
+    }
+
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
   };
@@ -91,22 +96,23 @@ export default function renderNonAR() {
 
   // p2p
   const p2pClient = new P2PClient(true);
-  print({info: `Connection ID: ${p2pClient.id}`});
+  $title.innerHTML = `Your ID: ${p2pClient.id}`;
 
-  p2pClient.on('open', () => print({info: 'Connection established'}));
+  p2pClient.on('open', () => {
+    $title.innerHTML = 'Connection established';
+    rotateScene = false;
+    scene.rotation.y = 0;
+    setTimeout(() => {$title.parentNode.style.display = 'none';}, 2000);
+  });
+
   p2pClient.on('data', data => {
-
     if (data.byteLength === 14) {
       handlePose(data, poseIndicator);
       return;
     }
-    
+
+    // TODO handle responses with byteLength >= 65664
     handlePoints(data, bufferGeometry);
-    
-    nextOffset = 0;
-    if (data.byteLength === 65664) {
-      nextOffset = 32832; // byteLength / 2
-    }
   });
 }
 
@@ -123,7 +129,7 @@ function handlePose(data, poseIndicator) {
   print({pose: {
     position: [poseFloat32[0], poseFloat32[1], poseFloat32[2]],
     orientation: [poseFloat32[3], poseFloat32[4], poseFloat32[5], poseFloat32[6]]
-  }})
+  }});
 }
 
 function handlePoints(data, bufferGeometry) {
@@ -131,14 +137,14 @@ function handlePoints(data, bufferGeometry) {
   const length = source.length;
   const target = bufferGeometry.attributes.position.array;
 
-  copyInt16ToFloat32(source, target, nextOffset, length);
+  copyInt16ToFloat32(source, target, 0, length);
 
-  if (nextOffset === 0) {
-    for (let i = length; i < target.length; i++) {
-      target[i] = 0;
-    }
-    print({points: length / 3});
+  // clear any old values
+  for (let i = length; i < target.length; i++) {
+    target[i] = 0;
   }
+
+  print({points: length / 3});
 
   bufferGeometry.attributes.position.needsUpdate = true;
 }

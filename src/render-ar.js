@@ -10,6 +10,12 @@ const pointsI16 = new Int16Array(120000);
 let frameData = null;
 const container = document.getElementById('container');
 const print = getPrintFn(container);
+const $title = document.getElementById('title');
+const $subtitle = document.getElementById('subtitle');
+
+const SEND_POSE_EVERY_X_FRAME = 1;
+const SEND_POINTS_EVERY_X_FRAME = 5;
+const SKIP_POINTS = 4; // otherwise it's too much data
 
 export default function renderAR(vrd) {
   vrDisplay = vrd;
@@ -23,9 +29,10 @@ export default function renderAR(vrd) {
   }
 
   // eslint-disable-next-line no-alert
-  const targetId = prompt('Please enter partner ID');
+  const targetId = prompt('Please enter connection ID');
 
   if (!targetId || targetId.length !== 5) {
+    alert('Invalid connection ID'); // eslint-disable-line no-alert
     return;
   }
 
@@ -39,7 +46,8 @@ export default function renderAR(vrd) {
     animate();
   });
 
-  print({info: `Connection established: ${p2pClient.id} -> ${targetId}`});
+  $title.innerHTML = 'Connection established';
+  $subtitle.innerHTML = `${p2pClient.id} -> ${targetId}`;
 }
 
 let frames = 0;
@@ -48,7 +56,7 @@ function animate() {
 
   requestAnimationFrame(animate);
 
-  if (frameData && frames % 1 === 0) {
+  if (frameData && frames % SEND_POSE_EVERY_X_FRAME === 0) {
     vrDisplay.getFrameData(frameData);
     
     const {pose} = frameData;
@@ -57,8 +65,11 @@ function animate() {
     print({pose});
   }
 
-  if (typeof vrDisplay.getPointCloud === 'function' && frames % 15 === 0) {
-    vrDisplay.getPointCloud(pointCloud, false, 1, true);
+  if (
+    typeof vrDisplay.getPointCloud === 'function' &&
+    frames % SEND_POINTS_EVERY_X_FRAME === 0
+  ) {
+    vrDisplay.getPointCloud(pointCloud, false, SKIP_POINTS, true);
     copyFloat32ToInt16(
       pointCloud.points,
       pointsI16,
