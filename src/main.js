@@ -2,11 +2,13 @@ import getVRDisplay from './get-vr-device';
 import renderAR from './render-ar';
 import renderNonAR from './render-non-ar';
 
-getVRDisplay(navigator).then(vrDisplay => {
-  if (!vrDisplay) {
-    renderNonAR();
-    return;
-  }
+getVRDisplay(navigator)
+  .then(vrDisplay => {
+    if (!vrDisplay) {
+      renderNonAR();
+      return;
+    }
 
-  renderAR(vrDisplay);
-});
+    renderAR(vrDisplay);
+  })
+  .catch(() => alert('Browser not supported')); // eslint-disable-line no-alert

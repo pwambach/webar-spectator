@@ -1,7 +1,4 @@
 export default function(navigator) {
-  // const regx = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-  // return Promise.resolve(Boolean(regx.test(navigator.userAgent)));
-
   if (!navigator.getVRDisplays) {
     return Promise.resolve(null);
   }
