@@ -2,9 +2,7 @@
 
   View WebAR pose data (and depth data with Tango) on a second device as a third person spectator. Data is transmitted serverless via a p2p WebRTC connection.
 
-  gif
-
-  [Try it](https://webar-spectator.now.sh) or view video
+  [Try it](https://webar-spectator.now.sh) or view [video](https://youtu.be/RyP7H7sr_Ww)
 
 ## Why
 
