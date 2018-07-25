@@ -11,15 +11,17 @@
   "author": "Philipp Wambach <wambach@ubilabs.com>",
   "license": "ISC",
   "dependencies": {
+    "dat.gui": "^0.7.2",
     "p2p-client": "^1.0.0",
     "three": "^0.87.1",
-    "three-orbit-controls": "^82.1.0"
+    "three-orbit-controls": "^82.1.0",
+    "three.ar.js": "^0.1.6"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
     "eslint": "^4.6.1",
     "eslint-config-prettier": "^2.3.0",
-    "serve": "^6.1.0",
+    "serve": "^6.5.8",
     "webpack": "^3.5.5"
   }
 }

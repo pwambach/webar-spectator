@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import createOrbitControls from 'three-orbit-controls';
 import {copyInt16ToFloat32} from './array-utils';
 import {getPrintFn} from './print-data';
+import dat from 'dat.gui/build/dat.gui.js';
 
 const poseFloat32 = new Float32Array(7);
 const container = document.getElementById('container');
@@ -10,7 +11,9 @@ const print = getPrintFn(container);
 const $title = document.getElementById('title');
 let rotateScene = true;
 
+
 export default function renderNonAR() {
+  const options = {size: 0};
   // Camera
   const camera = new THREE.PerspectiveCamera(
     75,
@@ -55,7 +58,7 @@ export default function renderNonAR() {
 
   // Point Cloud
   const pointsMaterial = new THREE.PointsMaterial({
-    size: 0.001,
+    size: options.size,
     color: 0x333333
   });
   pointsMaterial.depthWrite = false;
@@ -113,6 +116,14 @@ export default function renderNonAR() {
 
     // TODO handle responses with byteLength >= 65664
     handlePoints(data, bufferGeometry);
+  });
+
+  // dat.gui
+  const gui = new dat.GUI();
+  const sizeController = gui.add(options, 'size', 0, 10);
+  sizeController.onChange(value => {
+    points.material.size = value / 100;
+    points.material.needsUpdate = true;
   });
 }
 

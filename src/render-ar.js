@@ -1,6 +1,8 @@
 import P2PClient from 'p2p-client';
 import {copyFloat32ToInt16} from './array-utils';
 import {getPrintFn} from './print-data';
+import * as THREE from 'three';
+import {ARPerspectiveCamera, ARView} from 'three.ar.js';
 
 let p2pClient = null;
 let vrDisplay = null;
@@ -13,12 +15,29 @@ const print = getPrintFn(container);
 const $title = document.getElementById('title');
 const $subtitle = document.getElementById('subtitle');
 
+let vrControls = null;
+let arView = null;
+let camera = null;
+
+const renderer = new THREE.WebGLRenderer({alpha: true});
+const scene = new THREE.Scene();
+
 const SEND_POSE_EVERY_X_FRAME = 1;
 const SEND_POINTS_EVERY_X_FRAME = 5;
 const SKIP_POINTS = 4; // otherwise it's too much data
 
 export default function renderAR(vrd) {
   vrDisplay = vrd;
+
+  arView = new ARView(vrDisplay, renderer);
+  camera = new ARPerspectiveCamera(
+    vrDisplay,
+    60,
+    window.innerWidth / window.innerHeight,
+    vrDisplay.depthNear,
+    vrDisplay.depthFar
+  );
+  vrControls = new THREE.VRControls(camera);
 
   if (window.VRPointCloud) {
     pointCloud = new VRPointCloud();
@@ -79,6 +98,8 @@ function animate() {
     p2pClient.send(pointsI16.slice(0, pointCloud.numberOfPoints * 3));
     print({points: pointCloud.numberOfPoints});
   }
+
+  update();
 }
 
 function copyToPoseBuffer(pose) {
@@ -90,4 +111,14 @@ function copyToPoseBuffer(pose) {
   poseData[4] = pose.orientation[1] * 1000;
   poseData[5] = pose.orientation[2] * 1000;
   poseData[6] = pose.orientation[3] * 1000;
+}
+
+function update() {
+  // Update our controls/camera, the ARView rendering,
+  // and our three.js scene
+  vrControls.update();
+  arView.render();
+  renderer.clearDepth();
+  renderer.render(scene, camera);
+  vrDisplay.requestAnimationFrame(update);
 }

@@ -11,4 +11,7 @@ getVRDisplay(navigator)
 
     renderAR(vrDisplay);
   })
-  .catch(() => alert('Browser not supported')); // eslint-disable-line no-alert
+  .catch((error) => {
+    alert('Browser not supported'); // eslint-disable-line no-alert
+    console.error(error);
+  });
